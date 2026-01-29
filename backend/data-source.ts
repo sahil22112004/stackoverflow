@@ -1,10 +1,10 @@
-// import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { runSeeders, SeederOptions } from 'typeorm-extension';
-// import UserSeeder from './src/database/seeds/user.seeder';
-// import UserFactory from './src/database/factories/user.factory';
 import { config } from "dotenv"
 import { User } from './src/auth/entities/auth.entity';
+import { Question } from './src/questions/entities/question.entity';
+import { Tag } from './src/tags/entities/tag.entity';
+import TagSeeder from './src/database/seeders/tag.seeder';
 
 config();
 
@@ -13,13 +13,13 @@ const datasource :DataSourceOptions & SeederOptions={
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'admin',
+  password: '1104',
   database: 'stackoverflow',
-  entities: [User],
+  entities: [User,Question,Tag],
   migrations: ['src/migrations/*.ts'],
   synchronize: false, 
   // factories: [UserFactory],
-  seeds: [],
+  seeds: [TagSeeder],
   // ssl: {
   //   rejectUnauthorized: false,
   // },

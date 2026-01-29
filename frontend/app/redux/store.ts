@@ -1,6 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-// import productReducer from "./slices/productSlice"
+import questionReducer from "./slices/questionSlice"
 // import AdvertisementReducer from "./slices/advertisementSlice"
 import {
   persistStore,
@@ -24,7 +24,7 @@ const persistedReducer = persistReducer(
   persistConfig,
   combineReducers({
     auth: authReducer,
-    // product:productReducer,
+    questions:questionReducer,
     // Advertisement:AdvertisementReducer
   })
 );

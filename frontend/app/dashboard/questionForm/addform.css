@@ -1,0 +1,112 @@
+.main {
+  min-height: 100vh;
+  background-color: #f5f6f7;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.form {
+  width: 100%;
+  max-width: 700px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #232629;
+}
+
+.form input,
+.form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #cfd4d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.form input:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: #0a95ff;
+}
+
+.error {
+  color: #d0393e;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #0a95ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  border: 1px solid #cfd4d9;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.status-box-group {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0;
+}
+
+.status-box {
+  flex: 1;
+  border: 1px solid #cfd4d9;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+.status-box.active {
+  border-color: #0a95ff;
+  background-color: #f1f8ff;
+}
+
+.status-box h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.status-box p {
+  margin: 0;
+  font-size: 13px;
+  color: #6a737c;
+}
+
+@media (max-width: 600px) {
+  .form {
+    padding: 15px;
+  }
+
+  .status-box-group {
+    flex-direction: column;
+  }
+}

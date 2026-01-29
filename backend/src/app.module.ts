@@ -5,6 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from "dotenv"
 import { User } from './auth/entities/auth.entity';
+import { QuestionsModule } from './questions/questions.module';
+import { TagsModule } from './tags/tags.module';
+import { Question } from './questions/entities/question.entity';
+import { Tag } from './tags/entities/tag.entity';
 
 
 @Module({
@@ -14,9 +18,9 @@ import { User } from './auth/entities/auth.entity';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'admin',
+      password: '1104',
       database: 'stackoverflow',
-      entities: [User],
+      entities: [User,Question,Tag],
       synchronize: false,
       //   ssl: {
       //   rejectUnauthorized: false,
@@ -24,7 +28,11 @@ import { User } from './auth/entities/auth.entity';
 
     }),
 
-    AuthModule],
+    AuthModule,
+
+    QuestionsModule,
+
+    TagsModule],
   controllers: [AppController],
   providers: [AppService],
 })
