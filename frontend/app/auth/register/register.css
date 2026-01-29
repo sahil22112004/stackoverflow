@@ -1,0 +1,148 @@
+.register-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f1f3f6;
+  padding: 20px;
+}
+
+.register-container {
+  display: flex;
+  width: 500px;
+  min-height: 520px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 20px;
+  padding: 50px 0px;
+}
+
+
+.register-right {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  background: white;
+}
+
+.register-form {
+  width: 100%;
+}
+
+.register-input {
+  margin-bottom: 22px !important;
+  font-size: 16px !important;
+  /* border: 1px solid black !important; */
+}
+
+.register-input input {
+  font-size: 16px !important;
+}
+
+.register-btn {
+  background-color: #6191ec !important;
+  color: white !important;
+  font-weight: bold !important;
+  height: 42px;
+  font-size: 15px !important;
+  margin-bottom: 18px;
+  margin-bottom: 20px !important;
+}
+
+.register-btn:hover {
+  background-color: #3847b6 !important;
+}
+
+.register-or {
+  text-align: center;
+  margin: 10px 0 18px 0;
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 20px !important;
+}
+
+.google-btn {
+  background-color: white !important;
+  color: #2874F0 !important;
+  border: 1px solid #e0e0e0 !important;
+  font-weight: bold !important;
+  height: 42px;
+  font-size: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+.github-btn {
+  background-color: white !important;
+  color: #040404 !important;
+  border: 1px solid #e0e0e0 !important;
+  font-weight: bold !important;
+  height: 42px;
+  font-size: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+
+.register-login-text {
+  margin-top: 26px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-login-text a {
+  color: #2874F0;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .register-container {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .register-left,
+  .register-right {
+    width: 100%;
+    height: auto;
+    padding: 24px;
+  }
+
+  .register-left {
+    text-align: center;
+    padding-top: 40px;
+  }
+
+  .register-title {
+    font-size: 24px;
+  }
+
+  .register-subtitle {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .register-right {
+    padding: 20px;
+  }
+
+  .register-input {
+    margin-bottom: 18px !important;
+  }
+
+  .register-btn,
+  .google-btn {
+    height: 40px;
+    font-size: 14px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .register-login-text {
+    font-size: 13px;
+  }
+}

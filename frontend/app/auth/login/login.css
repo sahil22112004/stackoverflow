@@ -1,0 +1,135 @@
+.login-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f1f3f6;
+  padding: 20px;
+}
+
+.login-container {
+  display: flex;
+  width: 500px;
+  height: 500px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 20px;
+}
+
+
+.login-right {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  background: white;
+}
+
+.login-form {
+  width: 100%;
+}
+
+.login-input {
+  margin-bottom: 24px !important;
+  font-size: 16px !important;
+}
+
+.login-input input {
+  font-size: 16px !important;
+}
+
+.login-btn {
+  background-color:  #6191ec !important;
+  color: white !important;
+  font-weight: bold !important;
+  margin-bottom: 18px;
+  height: 42px;
+  font-size: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+.login-btn:hover {
+  background-color: #0743bb !important;
+}
+
+.login-or {
+  text-align: center;
+  margin: 10px 0 18px 0;
+  font-weight: 500;
+  font-size: 15px;
+  margin-bottom: 20px !important;
+}
+
+.google-btn {
+  background-color: white !important;
+  color: #2874F0 !important;
+  border: 1px solid #e0e0e0 !important;
+  font-weight: bold !important;
+  height: 42px;
+  font-size: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+.signup-text {
+  margin-top: 26px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.signup-text a {
+  color: #2874F0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .login-container {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .login-left,
+  .login-right {
+    width: 100%;
+    height: auto;
+    padding: 24px;
+  }
+
+  .login-left {
+    text-align: center;
+    padding-top: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-title {
+    font-size: 22px;
+  }
+
+  .login-subtitle {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .login-right {
+    padding: 20px;
+  }
+
+  .login-input {
+    margin-bottom: 18px !important;
+  }
+
+  .login-btn,
+  .google-btn {
+    height: 40px;
+    font-size: 14px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .signup-text {
+    font-size: 13px;
+  }
+}
