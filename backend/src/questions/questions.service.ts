@@ -48,18 +48,16 @@ async create(createQuestionDto: CreateQuestionDto) {
 
 
    async findAllPublic(query: QuestionQuery) {
-    const {
-      search,
-      tags,
-      limit = 10,
-      offset = 0,
-    } = query
+    const { search, tags, limit = 10, offset = 0} = query
 
     const qb = this.questionRepository
       .createQueryBuilder('question')
+      // .leftJoinAndSelect("question.userId", "users")
       .where('question.status = :status', {
         status: QuestionStatus.published,
-      })
+      },
+    
+    )
 
     if (search) {
       qb.andWhere(
@@ -81,6 +79,8 @@ async create(createQuestionDto: CreateQuestionDto) {
 
       qb.andWhere('question.tagIds && ARRAY[:...tagIds]', { tagIds })
     }
+
+    
 
     qb.skip(offset).take(limit)
 

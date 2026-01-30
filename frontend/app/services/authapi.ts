@@ -3,7 +3,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export const apiRegister = async (user: any) => {
   console.log('working')
-  const res = await fetch(`${BASE_URL}/auth`, {
+  const res = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),

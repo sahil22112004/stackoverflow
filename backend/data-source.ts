@@ -5,6 +5,7 @@ import { User } from './src/auth/entities/auth.entity';
 import { Question } from './src/questions/entities/question.entity';
 import { Tag } from './src/tags/entities/tag.entity';
 import TagSeeder from './src/database/seeders/tag.seeder';
+import { Answer } from './src/answers/entities/answer.entity';
 
 config();
 
@@ -13,9 +14,9 @@ const datasource :DataSourceOptions & SeederOptions={
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: '1104',
+  password: 'admin',
   database: 'stackoverflow',
-  entities: [User,Question,Tag],
+  entities: [User,Question,Tag,Answer],
   migrations: ['src/migrations/*.ts'],
   synchronize: false, 
   // factories: [UserFactory],

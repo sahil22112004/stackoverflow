@@ -9,6 +9,9 @@ import { QuestionsModule } from './questions/questions.module';
 import { TagsModule } from './tags/tags.module';
 import { Question } from './questions/entities/question.entity';
 import { Tag } from './tags/entities/tag.entity';
+import { AnswersModule } from './answers/answers.module';
+import { VotesModule } from './votes/votes.module';
+import { Answer } from './answers/entities/answer.entity';
 
 
 @Module({
@@ -18,9 +21,9 @@ import { Tag } from './tags/entities/tag.entity';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1104',
+      password: 'admin',
       database: 'stackoverflow',
-      entities: [User,Question,Tag],
+      entities: [User,Question,Tag,Answer],
       synchronize: false,
       //   ssl: {
       //   rejectUnauthorized: false,
@@ -32,7 +35,11 @@ import { Tag } from './tags/entities/tag.entity';
 
     QuestionsModule,
 
-    TagsModule],
+    TagsModule,
+
+    AnswersModule,
+
+    VotesModule],
   controllers: [AppController],
   providers: [AppService],
 })

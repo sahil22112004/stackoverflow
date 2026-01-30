@@ -55,13 +55,15 @@ function Register() {
             }
             try {
                 await dispatch(registerUser(User))
+                enqueueSnackbar("Registered Successfully!", { autoHideDuration: 3000 });
+                router.push('/auth/login')
 
-            } catch {
+            } catch (error:any){
+                enqueueSnackbar(error.message, { autoHideDuration: 3000 });
 
             }
             console.log(firebaseUser)
 
-            enqueueSnackbar("Registered Successfully!", { autoHideDuration: 3000 });
         } catch (error: any) {
             console.error(error);
             enqueueSnackbar(error.message, { autoHideDuration: 3000 });

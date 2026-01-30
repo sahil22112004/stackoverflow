@@ -30,14 +30,14 @@ const initialState: QuestionState = {
   loading: false,
   error: null,
   hasMore: true,
-  offset: 0,
+  offset: 0
 }
 
 export const createQuestion = createAsyncThunk(
-  'questions/create',
-  async (question: CreateQuestionPayload, { rejectWithValue }) => {
+  'create',
+  async (payload: CreateQuestionPayload, { rejectWithValue }) => {
     try {
-      return await apiCreateQuestion(question)
+      return await apiCreateQuestion(payload)
     } catch (err: any) {
       return rejectWithValue(err.message)
     }
@@ -45,7 +45,7 @@ export const createQuestion = createAsyncThunk(
 )
 
 export const fetchAllQuestions = createAsyncThunk(
-  'questions/fetchAll',
+  'fetchAll',
   async (params: FetchParams, { rejectWithValue }) => {
     try {
       return await apiGetAllQuestions(params)
@@ -64,7 +64,7 @@ const questionSlice = createSlice({
       state.offset = 0
       state.hasMore = true
       state.error = null
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -73,19 +73,25 @@ const questionSlice = createSlice({
       })
       .addCase(fetchAllQuestions.fulfilled, (state, action) => {
         state.loading = false
-        state.questions.push(...action.payload.questions)
-        state.offset += action.payload.questions.length
+
+        const existingIds = new Set(state.questions.map(q => q.id))
+        const uniqueQuestions = action.payload.questions.filter(
+          (q: Question) => !existingIds.has(q.id)
+        )
+
+        state.questions.push(...uniqueQuestions)
+        state.offset += uniqueQuestions.length
         state.hasMore = state.questions.length < action.payload.total
       })
       .addCase(fetchAllQuestions.rejected, (state, action: any) => {
         state.loading = false
         state.error = action.payload
+        state.hasMore = false
       })
-
       .addCase(createQuestion.fulfilled, (state, action) => {
         state.questions.unshift(action.payload)
       })
-  },
+  }
 })
 
 export const { resetQuestions } = questionSlice.actions

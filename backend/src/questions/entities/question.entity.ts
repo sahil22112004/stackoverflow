@@ -36,7 +36,7 @@ export class Question {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-@Column({ type: 'uuid' })
+  @Column({ type: 'uuid' })
   userId: string;
 
   @Column('int', { array: true })

@@ -47,8 +47,21 @@ export const apiGetAllQuestions = async (params: any) => {
   return data
 }
 
-export const apiGetAllTags = async (): Promise<Tag[]> => {
+export const apiGetAllTags = async () => {
   const res = await fetch(`${BASE_URL}/tags`, {
+    method: 'GET',
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch tags');
+  return data;
+};
+
+
+export const apigetQuestionById = async (id:any) => {
+
+  console.log('working')
+  const res = await fetch(`${BASE_URL}/questions/${id}`, {
     method: 'GET',
   });
 

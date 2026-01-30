@@ -1,73 +1,74 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { enqueueSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { enqueueSnackbar } from "notistack"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
 
-import "./addform.css";
-import { createQuestion } from "../../redux/slices/questionSlice";
-import { RootState, AppDispatch } from "../../redux/store";
+import "./addform.css"
+import TextEditor from "@/app/components/muitiptap"
+import { createQuestion } from "../../redux/slices/questionSlice"
+import { RootState, AppDispatch } from "../../redux/store"
 
 const questionSchema = z.object({
-  title: z.string().min(10),
-  description: z.string().min(20),
-  tags: z.string().min(1),
-});
+  title: z.string().min(10).max(50).trim(),
+  description: z.string().min(20).max(2000).trim(),
+  tags: z.string().min(1).trim(),
+})
 
-type QuestionFormData = z.infer<typeof questionSchema>;
+type QuestionFormData = z.infer<typeof questionSchema>
 
 export default function AskQuestion() {
-  const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
 
-  const { currentUser } = useSelector((state: RootState) => state.auth);
-  // console.log("this is currentuser",currentUser)
-  const { loading, error } = useSelector(
-    (state: RootState) => state.questions
-  );
+  const { currentUser } = useSelector((state: RootState) => state.auth)
+  const { loading } = useSelector((state: RootState) => state.questions)
 
-  const [status, setStatus] = useState<"draft" | "published">("draft");
+  const [status, setStatus] = useState<"draft" | "published">("published")
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
-  });
+    defaultValues: {
+      title: "",
+      description: "",
+      tags: "",
+    },
+  })
 
   const onSubmit = (data: QuestionFormData) => {
     if (!currentUser?.id) {
-      enqueueSnackbar("Please login first", { variant: "error" });
-      return;
+      enqueueSnackbar("Please login first", { variant: "error" })
+      return
     }
 
     const tagsArray = data.tags
       .split(",")
-      .map((t) => t.trim().toLowerCase())
+      .map(t => t.trim().toLowerCase())
       .filter(Boolean)
-      .slice(0, 5);
-
-    if (tagsArray.length === 0) {
-      enqueueSnackbar("At least one tag required", { variant: "error" });
-      return;
-    }
+      .slice(0, 5)
 
     dispatch(
       createQuestion({
         title: data.title,
         description: data.description,
         tags: tagsArray,
-        userId: "7a8c584a-7a13-4eb2-a847-110011869897",
+        userId: String(currentUser.id),
         status,
       })
-    );
-  };
+    )
 
+    enqueueSnackbar("Question added successfully", { variant: "success" })
+    router.push("/dashboard")
+  }
 
   return (
     <div className="main">
@@ -81,10 +82,16 @@ export default function AskQuestion() {
         />
         {errors.title && <p className="error">{errors.title.message}</p>}
 
-        <textarea
-          placeholder="Describe your problem in detail..."
-          {...register("description")}
-          rows={6}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <TextEditor
+              value={field.value}
+              onChange={field.onChange}
+              
+            />
+          )}
         />
         {errors.description && (
           <p className="error">{errors.description.message}</p>
@@ -128,5 +135,6 @@ export default function AskQuestion() {
         </button>
       </form>
     </div>
-  );
+  )
 }
+
