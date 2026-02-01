@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { Question, QuestionStatus } from './entities/question.entity';
-import { Tag } from '../tags/entities/tag.entity';
-import { CreateQuestionDto } from './dto/create-question.dto';
-import { UpdateQuestionDto } from './dto/update-question.dto';
-import { QuestionQuery } from './interfaces/question-query.interface';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { In, Repository } from 'typeorm'
+import { Question } from './entities/question.entity'
+import { Tag } from '../tags/entities/tag.entity'
+import { CreateQuestionDto } from './dto/create-question.dto'
+import { UpdateQuestionDto } from './dto/update-question.dto'
+import { QuestionQuery } from './interfaces/question-query.interface'
 
 @Injectable()
 export class QuestionsService {
@@ -14,57 +14,55 @@ export class QuestionsService {
     private readonly questionRepository: Repository<Question>,
 
     @InjectRepository(Tag)
-    private readonly tagRepository: Repository<Tag>,
+    private readonly tagRepository: Repository<Tag>
   ) {}
 
-async create(createQuestionDto: CreateQuestionDto) {
-  const tagIds: number[] = [];
+  async create(dto: CreateQuestionDto) {
+    const tagIds: string[] = []
 
-  for (const tagName of createQuestionDto.tags) {
-    const normalizedTag = tagName.trim().toLowerCase();
+    for (const tagName of dto.tags) {
+      const normalized = tagName.trim().toLowerCase()
 
-    let tag = await this.tagRepository.findOne({
-      where: { name: normalizedTag },
-    });
+      let tag = await this.tagRepository.findOne({
+        where: { name: normalized },
+      })
 
-    if (!tag) {
-      tag = this.tagRepository.create({ name: normalizedTag });
-      tag = await this.tagRepository.save(tag);
+      if (!tag) {
+        tag = this.tagRepository.create({ name: normalized })
+        tag = await this.tagRepository.save(tag)
+      }
+
+      tagIds.push(String(tag.id))
     }
 
-    tagIds.push(tag.id);
+    const question = this.questionRepository.create({
+      title: dto.title,
+      description: dto.description,
+      status: dto.status,
+      userId: dto.userId,
+      tagIds,
+    })
+
+    return this.questionRepository.save(question)
   }
 
-  const question:any = this.questionRepository.create({
-    title: createQuestionDto.title,
-    description: createQuestionDto.description,
-    status: createQuestionDto.status, 
-    userId: createQuestionDto.userId,
-    tagIds,
-  });
+  async findAllPublic(query: QuestionQuery) {
+    const limit = Number(query.limit) || 10
+    const offset = Number(query.offset) || 0
 
-  return await this.questionRepository.save(question);
-}
+    const qb = this.questionRepository.createQueryBuilder('q')
 
-
-   async findAllPublic(query: QuestionQuery) {
-    const { search, tags, limit = 10, offset = 0} = query
-
-    const qb = this.questionRepository
-      .createQueryBuilder('question')
-      // .leftJoinAndSelect("question.userId", "users")
-      .where('question.status = :status', {
-        status: QuestionStatus.published,
-      },
-    
-    )
-
-    if (search) {
+    if (query.search) {
       qb.andWhere(
-        '(LOWER(question.title) LIKE LOWER(:search) OR LOWER(question.description) LIKE LOWER(:search))',
-        { search: `%${search}%` }
+        '(LOWER(q.title) LIKE :s OR LOWER(q.description) LIKE :s)',
+        { s: `%${query.search.toLowerCase()}%` }
       )
     }
+
+    const tags =
+      typeof query.tags === 'string'
+        ? query.tags.split(',').filter(Boolean)
+        : query.tags?.filter(Boolean)
 
     if (tags && tags.length > 0) {
       const foundTags = await this.tagRepository.find({
@@ -77,66 +75,52 @@ async create(createQuestionDto: CreateQuestionDto) {
         return { total: 0, questions: [] }
       }
 
-      qb.andWhere('question.tagIds && ARRAY[:...tagIds]', { tagIds })
+      qb.andWhere('q.tagIds && ARRAY[:...tagIds]::uuid[]', {
+        tagIds,
+      })
     }
 
-    
+    if (query.sortByScore === 'true') {
+      qb.orderBy('q.score', 'DESC')
+    } else {
+      qb.orderBy('q.createdAt', 'DESC')
+    }
 
     qb.skip(offset).take(limit)
 
     const [questions, total] = await qb.getManyAndCount()
 
-    const allTagIds = [...new Set(questions.flatMap(q => q.tagIds))]
-    const allTags = await this.tagRepository.find({
-      where: { id: In(allTagIds) },
-    })
-
-    const tagMap = new Map<number, string>()
-    allTags.forEach(t => tagMap.set(t.id, t.name))
-
-    const result = questions.map(q => ({
-      id: q.id,
-      title: q.title,
-      description: q.description,
-      status: q.status,
-      createdAt: q.createdAt,
-      tags: q.tagIds.map(id => tagMap.get(id)),
-    }))
-
-    return { total, questions: result }
+    return { total, questions }
   }
 
   async findAllByUser(userId: string) {
-    return await this.questionRepository.find({
+    return this.questionRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
-    });
+    })
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const question = await this.questionRepository.findOne({
       where: { id },
-    });
+    })
 
     if (!question) {
-      throw new NotFoundException('Question not found');
+      throw new NotFoundException('Question not found')
     }
 
-    return question;
+    return question
   }
 
-  async update(id: number, updateQuestionDto: UpdateQuestionDto) {
-    const question = await this.findOne(id);
-
-    Object.assign(question, updateQuestionDto);
-
-    return await this.questionRepository.save(question);
+  async update(id: string, dto: UpdateQuestionDto) {
+    const question = await this.findOne(id)
+    Object.assign(question, dto)
+    return this.questionRepository.save(question)
   }
 
-  async remove(id: number) {
-    const question = await this.findOne(id);
-    await this.questionRepository.remove(question);
-
-    return { message: 'Question deleted successfully' };
+  async remove(id: string) {
+    const question = await this.findOne(id)
+    await this.questionRepository.remove(question)
+    return { deleted: true }
   }
 }

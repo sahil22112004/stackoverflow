@@ -1,7 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import questionReducer from "./slices/questionSlice"
-// import AdvertisementReducer from "./slices/advertisementSlice"
+import voteReducer from "./slices/voteSlice"
 import {
   persistStore,
   persistReducer,
@@ -25,7 +25,7 @@ const persistedReducer = persistReducer(
   combineReducers({
     auth: authReducer,
     questions:questionReducer,
-    // Advertisement:AdvertisementReducer
+    votes:voteReducer
   })
 );
 

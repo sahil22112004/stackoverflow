@@ -1,33 +1,56 @@
+const BASE_URL = 'http://localhost:4000'
 
+export interface CreateAnswerPayload {
+  questionId: string
+  userId: string
+  answer: string
+  parentAnswerId?: string
+}
 
-export const apiCreateAnswer = async (Answer: any) => {
-    console.log(
-        'ANSWER',Answer
-    )
+export interface GetAnswersParams {
+  limit?: number
+  offset?: number
+}
 
-
-  const res = await fetch(` http://localhost:4000/answers`, {
+export const apiCreateAnswer = async (payload: CreateAnswerPayload) => {
+  const res = await fetch(`${BASE_URL}/answers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(Answer),
-  });
+    body: JSON.stringify(payload),
+  })
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Failed to create question');
-  return data;
-};
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || 'Failed to create answer')
+  return data
+}
 
+export const apiGetAnswersForQuestion = async (
+  questionId: string,
+  params: GetAnswersParams = {}
+) => {
+  const query = new URLSearchParams()
 
-export const apiGetAswerForQuestion = async (id:any) => {
-    console.log('answer working')
-  const res = await fetch(`http://localhost:4000/answers/${id}`, {
-    method: 'GET',
-  });
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) query.append(key, String(value))
+  })
 
-  const data = await res.json();
-  console.log(data)
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch tags');
-  return data;
-};
+  const res = await fetch(
+    `${BASE_URL}/answers/question/${questionId}?${query.toString()}`
+  )
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch answers')
+  return data
+}
+
+export const apiGetRepliesForAnswer = async (parentAnswerId: string) => {
+  const res = await fetch(
+    `${BASE_URL}/answers/replies/${parentAnswerId}`
+  )
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch replies')
+  return data
+}

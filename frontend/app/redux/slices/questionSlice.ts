@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { apiCreateQuestion, apiGetAllQuestions, CreateQuestionPayload } from '../../services/questinsApi'
+import {
+  apiCreateQuestion,
+  apiGetAllQuestions,
+  CreateQuestionPayload,
+} from '../../services/questinsApi'
 
 export interface Question {
   id: number
@@ -8,6 +12,7 @@ export interface Question {
   tags: string[]
   status: 'draft' | 'published'
   createdAt: string
+  score: number
 }
 
 interface FetchParams {
@@ -15,6 +20,8 @@ interface FetchParams {
   limit: number
   search?: string
   tags?: string[]
+  sortByScore?: boolean
+  sortByNewest?: boolean
 }
 
 interface QuestionState {
@@ -30,12 +37,13 @@ const initialState: QuestionState = {
   loading: false,
   error: null,
   hasMore: true,
-  offset: 0
+  offset: 0,
 }
 
 export const createQuestion = createAsyncThunk(
-  'create',
+  'questions/create',
   async (payload: CreateQuestionPayload, { rejectWithValue }) => {
+    console.log("data when in slice ",payload)
     try {
       return await apiCreateQuestion(payload)
     } catch (err: any) {
@@ -45,7 +53,7 @@ export const createQuestion = createAsyncThunk(
 )
 
 export const fetchAllQuestions = createAsyncThunk(
-  'fetchAll',
+  'questions/fetchAll',
   async (params: FetchParams, { rejectWithValue }) => {
     try {
       return await apiGetAllQuestions(params)
@@ -59,28 +67,28 @@ const questionSlice = createSlice({
   name: 'questions',
   initialState,
   reducers: {
-    resetQuestions: (state) => {
+    resetQuestions: state => {
       state.questions = []
       state.offset = 0
       state.hasMore = true
       state.error = null
-    }
+    },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(fetchAllQuestions.pending, (state) => {
+      .addCase(fetchAllQuestions.pending, state => {
         state.loading = true
       })
       .addCase(fetchAllQuestions.fulfilled, (state, action) => {
         state.loading = false
 
         const existingIds = new Set(state.questions.map(q => q.id))
-        const uniqueQuestions = action.payload.questions.filter(
+        const unique = action.payload.questions.filter(
           (q: Question) => !existingIds.has(q.id)
         )
 
-        state.questions.push(...uniqueQuestions)
-        state.offset += uniqueQuestions.length
+        state.questions.push(...unique)
+        state.offset += unique.length
         state.hasMore = state.questions.length < action.payload.total
       })
       .addCase(fetchAllQuestions.rejected, (state, action: any) => {
@@ -91,7 +99,7 @@ const questionSlice = createSlice({
       .addCase(createQuestion.fulfilled, (state, action) => {
         state.questions.unshift(action.payload)
       })
-  }
+  },
 })
 
 export const { resetQuestions } = questionSlice.actions

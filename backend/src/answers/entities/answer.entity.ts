@@ -1,36 +1,49 @@
-import { Question } from 'src/questions/entities/question.entity';
-import { User } from '../../auth/entities/auth.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne } from 'typeorm';
-
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm'
 
 @Entity('answers')
 export class Answer {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
-
-  @ManyToOne(() => Question)
-  @JoinColumn({ name: 'questionId' })
-  question: Question;
-
-  @Column()
-  questionId: number;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  id: string
 
   @Column({ type: 'uuid' })
-  userId: string;
+  questionId: string
 
-  @Column()
-  answer: string;
+  @Column({ type: 'uuid' })
+  userId: string
 
-  @Column({default:false})
-  isValid: boolean;
+  @Column({ type: 'uuid', nullable: true })
+  parentAnswerId: string | null
+
+  @ManyToOne(() => Answer, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'parentAnswerId' })
+  parent: Answer | null
+
+  @Column({ type: 'text' })
+  answer: string
+
+  @Column({ default: false })
+  isValid: boolean
+
+  @Column({ default: 0 })
+  upvotes: number
+
+  @Column({ default: 0 })
+  downvotes: number
+
+  @Column({ default: 0 })
+  score: number
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: Date
 }

@@ -7,22 +7,20 @@ import {
   Param,
   Delete,
   Query,
-} from '@nestjs/common';
-import { QuestionsService } from './questions.service';
-import { CreateQuestionDto } from './dto/create-question.dto';
-import { UpdateQuestionDto } from './dto/update-question.dto';
-import type { QuestionQuery } from './interfaces/question-query.interface';
+} from '@nestjs/common'
+import { QuestionsService } from './questions.service'
+import { CreateQuestionDto } from './dto/create-question.dto'
+import { UpdateQuestionDto } from './dto/update-question.dto'
+import type { QuestionQuery } from './interfaces/question-query.interface'
 
 @Controller('questions')
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
-
   @Post()
-  create(@Body() createQuestionDto: CreateQuestionDto) {
-    return this.questionsService.create(createQuestionDto);
+  create(@Body() dto: CreateQuestionDto) {
+    return this.questionsService.create(dto)
   }
-
 
   @Get()
   findAllPublic(@Query() query: QuestionQuery) {
@@ -31,26 +29,21 @@ export class QuestionsController {
 
   @Get('user/:userId')
   findAllByUser(@Param('userId') userId: string) {
-    return this.questionsService.findAllByUser(userId);
+    return this.questionsService.findAllByUser(userId)
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.questionsService.findOne(+id);
+    return this.questionsService.findOne(id)
   }
-
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateQuestionDto: UpdateQuestionDto,
-  ) {
-    return this.questionsService.update(+id, updateQuestionDto);
+  update(@Param('id') id: string, @Body() dto: UpdateQuestionDto) {
+    return this.questionsService.update(id, dto)
   }
-
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.questionsService.remove(+id);
+    return this.questionsService.remove(id)
   }
 }

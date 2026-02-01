@@ -1,24 +1,25 @@
-export class CreateVoteDto {}
-import {  IsString, IsEmail,IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { IsEnum, IsUUID } from 'class-validator'
 
-enum VoteStatus {
+export enum VoteStatus {
   upvote = 'upvote',
   downvote = 'downvote',
 }
 
+export enum VoteTargetType {
+  question = 'question',
+  answer = 'answer',
+}
 
-export class CreateAnswerDto {
+export class CreateVoteDto {
+  @IsUUID()
+  targetId: string
 
-    @IsString({message:'enter only string'})
-    @IsOptional()
-    questionId:string
+  @IsEnum(VoteTargetType)
+  targetType: VoteTargetType
 
-    @IsEmail()
-    @IsNotEmpty({message:'this field cannot be emty'})
-    userId:string
+  @IsUUID()
+  userId: string
 
-    @IsEnum(VoteStatus)
-    status:VoteStatus
-
-    
+  @IsEnum(VoteStatus)
+  status: VoteStatus
 }

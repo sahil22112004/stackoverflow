@@ -8,11 +8,10 @@ export class TagsMigration1769711731347 implements MigrationInterface {
                 name: "tags",
                 columns: [
                     {
-                        name: "id",
-                        type: "int",
+                        name: 'id',
+                        type: 'uuid',
                         isPrimary: true,
-                        isGenerated: true,
-                        generationStrategy: "increment",
+                        default: 'uuid_generate_v4()',
                     },
                     {
                         name: "name",

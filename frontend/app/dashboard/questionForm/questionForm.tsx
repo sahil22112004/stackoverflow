@@ -45,6 +45,7 @@ export default function AskQuestion() {
   })
 
   const onSubmit = (data: QuestionFormData) => {
+    console.log("data when sunmiting ",data)
     if (!currentUser?.id) {
       enqueueSnackbar("Please login first", { variant: "error" })
       return

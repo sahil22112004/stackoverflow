@@ -1,26 +1,86 @@
-import { Injectable } from '@nestjs/common';
-import { CreateVoteDto } from './dto/create-vote.dto';
-import { UpdateVoteDto } from './dto/update-vote.dto';
+import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { DataSource, Repository } from 'typeorm'
+import { Vote } from './entities/vote.entity'
+import {
+  CreateVoteDto,
+  VoteStatus,
+  VoteTargetType,
+} from './dto/create-vote.dto'
+import { Answer } from '../answers/entities/answer.entity'
+import { Question } from '../questions/entities/question.entity'
 
 @Injectable()
 export class VotesService {
-  create(createVoteDto: CreateVoteDto) {
-    return 'This action adds a new vote';
-  }
+  constructor(
+    private readonly dataSource: DataSource,
 
-  findAll() {
-    return `This action returns all votes`;
-  }
+    @InjectRepository(Vote)
+    private readonly voteRepo: Repository<Vote>,
 
-  findOne(id: number) {
-    return `This action returns a #${id} vote`;
-  }
+    @InjectRepository(Answer)
+    private readonly answerRepo: Repository<Answer>,
 
-  update(id: number, updateVoteDto: UpdateVoteDto) {
-    return `This action updates a #${id} vote`;
-  }
+    @InjectRepository(Question)
+    private readonly questionRepo: Repository<Question>,
+  ) {}
 
-  remove(id: number) {
-    return `This action removes a #${id} vote`;
+  async vote(dto: CreateVoteDto) {
+    const { targetId, targetType, userId, status } = dto
+
+    return this.dataSource.transaction(async manager => {
+      const voteRepo = manager.getRepository(Vote)
+      const answerRepo = manager.getRepository(Answer)
+      const questionRepo = manager.getRepository(Question)
+
+      const existing = await voteRepo.findOne({
+        where: { targetId, targetType, userId },
+        withDeleted: true,
+      })
+
+      let upDelta = 0
+      let downDelta = 0
+      let scoreDelta = 0
+
+      if (!existing) {
+        await voteRepo.save(voteRepo.create(dto))
+        status === VoteStatus.upvote
+          ? (upDelta = 1, scoreDelta = 1)
+          : (downDelta = 1, scoreDelta = -1)
+      } 
+      else if (existing.deletedAt) {
+        existing.status = status
+        existing.deletedAt = null
+        await voteRepo.save(existing)
+        status === VoteStatus.upvote
+          ? (upDelta = 1, scoreDelta = 1)
+          : (downDelta = 1, scoreDelta = -1)
+      } 
+      else if (existing.status === status) {
+        await voteRepo.softDelete(existing.id)
+        status === VoteStatus.upvote
+          ? (upDelta = -1, scoreDelta = -1)
+          : (downDelta = -1, scoreDelta = 1)
+      } 
+      else {
+        existing.status = status
+        await voteRepo.save(existing)
+        status === VoteStatus.upvote
+          ? (upDelta = 1, downDelta = -1, scoreDelta = 2)
+          : (upDelta = -1, downDelta = 1, scoreDelta = -2)
+      }
+
+      if (targetType === VoteTargetType.answer) {
+        await answerRepo.increment({ id: targetId }, 'upvotes', upDelta)
+        await answerRepo.increment({ id: targetId }, 'downvotes', downDelta)
+        await answerRepo.increment({ id: targetId }, 'score', scoreDelta)
+      } else {
+        await questionRepo.increment({ id: targetId }, 'upvotes', upDelta)
+        await questionRepo.increment({ id: targetId }, 'downvotes', downDelta)
+        await questionRepo.increment({ id: targetId }, 'score', scoreDelta)
+      }
+
+      return { upDelta, downDelta, scoreDelta }
+    })
   }
 }

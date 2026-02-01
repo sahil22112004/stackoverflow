@@ -1,169 +1,224 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { apigetQuestionById } from "../../../services/questinsApi";
-import "./view.css";
-import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
-import { apiCreateAnswer, apiGetAswerForQuestion } from "@/app/services/answerApi";
-import { ClassNames } from "@emotion/react";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import TextEditor from "@/app/components/muitiptap";
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 
+import { RootState, AppDispatch } from "../../../redux/store"
+import { apiGetQuestionById } from "../../../services/questinsApi"
+import {
+  apiCreateAnswer,
+  apiGetAnswersForQuestion,
+  apiGetRepliesForAnswer,
+} from "@/app/services/answerApi"
+import { voteTarget } from "../../../redux/slices/voteSlice"
 
+import TextEditor from "@/app/components/muitiptap"
+import "./view.css"
 
-export default function ViewQuestion({ id }: any) {
+const schema = z.object({
+  text: z.string().min(20).max(2000),
+})
 
-    const questionSchema = z.object({
-        Answer: z.string().min(20).max(2000).trim(),
+type FormData = z.infer<typeof schema>
+
+const LIMIT = 5
+
+function AnswerItem({ answer }: { answer: any }) {
+  const dispatch = useDispatch<AppDispatch>()
+  const user = useSelector((s: RootState) => s.auth.currentUser)
+  const voteLoading = useSelector((s: RootState) => s.votes.loading)
+
+  const [replies, setReplies] = useState<any[]>([])
+  const [showReply, setShowReply] = useState(false)
+
+  const { handleSubmit, control, reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { text: "" },
+  })
+
+  const loadReplies = async () => {
+    const data = await apiGetRepliesForAnswer(answer.id)
+    setReplies(data)
+  }
+
+  useEffect(() => {
+    loadReplies()
+  }, [answer.id])
+
+  const submitReply = async (data: FormData) => {
+    if (!user) return
+
+    await apiCreateAnswer({
+      questionId: answer.questionId,
+      userId: String(user.id),
+      answer: data.text,
+      parentAnswerId: answer.id,
     })
 
-    type QuestionFormData = z.infer<typeof questionSchema>
-    const router = useRouter();
-    const [question, setQuestion] = useState<any>(null);
-    const [answer, setanswer] = useState<any>('')
-    const [answerData, setAnswerData] = useState<any[]>([])
+    reset()
+    setShowReply(false)
+    loadReplies()
+  }
 
+  const vote = (status: "upvote" | "downvote") => {
+    if (!user || voteLoading) return
 
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm<QuestionFormData>({
-        resolver: zodResolver(questionSchema),
-        defaultValues: {
-            Answer: "",
-        },
+    dispatch(
+      voteTarget({
+        targetId: answer.id,
+        targetType: "answer",
+        userId: String(user.id),
+        status,
+      })
+    ).then(loadReplies)
+  }
+
+  return (
+    <div className="ansBlock" >
+      <div className="votebtn">
+        <KeyboardArrowUpIcon onClick={() => vote("upvote")} />
+        <div className="voteScore">{answer.score}</div>
+        <KeyboardArrowDownIcon onClick={() => vote("downvote")} />
+      </div>
+
+      <div
+        className="answerText"
+        dangerouslySetInnerHTML={{ __html: answer.answer }}
+      />
+
+      <button className="replyBtn" onClick={() => setShowReply(v => !v)}>
+        Reply this answer
+      </button>
+
+      {showReply && (
+        <form onSubmit={handleSubmit(submitReply)} className="replyForm">
+          <Controller
+            name="text"
+            control={control}
+            render={({ field }) => (
+              <TextEditor value={field.value} onChange={field.onChange} />
+            )}
+          />
+          <button type="submit" className="subAnsBtn">
+            Post Reply
+          </button>
+        </form>
+      )}
+
+      {replies.map(r => (
+        <AnswerItem key={r.id} answer={r}  />
+      ))}
+    </div>
+  )
+}
+
+export default function ViewQuestion({ id }: { id: string }) {
+  const router = useRouter()
+  const user = useSelector((s: RootState) => s.auth.currentUser)
+
+  const [question, setQuestion] = useState<any>(null)
+  const [answers, setAnswers] = useState<any[]>([])
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+
+  const { handleSubmit, control, reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { text: "" },
+  })
+
+  const loadQuestion = async () => {
+    const q = await apiGetQuestionById(id)
+    setQuestion(q)
+  }
+
+  const loadAnswers = async (resetList = false) => {
+    const res = await apiGetAnswersForQuestion(id, {
+      limit: LIMIT,
+      offset: resetList ? 0 : offset,
     })
 
-    const user = useSelector((state: RootState) => state.auth.currentUser)
+    const data = res.answers ?? res
 
-    async function loadQuestion() {
-        console.log('working')
-        const ques = await apigetQuestionById(String(id));
-        setQuestion(ques);
-    }
-    async function loadAnswers() {
-        console.log('working answer')
-        const ans = await apiGetAswerForQuestion(String(id));
-        setAnswerData(ans);
+    if (resetList) {
+      setAnswers(data)
+      setOffset(data.length)
+    } else {
+      setAnswers(prev => [...prev, ...data])
+      setOffset(o => o + data.length)
     }
 
-    useEffect(() => {
-        console.log('working')
+    setHasMore(data.length === LIMIT)
+  }
 
-        loadQuestion();
-        loadAnswers()
-    }, [id]);
+  useEffect(() => {
+    loadQuestion()
+    loadAnswers(true)
+  }, [id])
 
-    console.log('ans is ', answerData)
+  const submitAnswer = async (data: FormData) => {
+    if (!user) return
 
+    await apiCreateAnswer({
+      questionId: id,
+      userId: String(user.id),
+      answer: data.text,
+    })
 
+    reset()
+    loadAnswers(true)
+  }
 
-    const onSubmit = async (data: any) => {
-        console.log("data is ", data)
-        if (answer.trim() == '') {
-            console.log('returning')
-            return
-        }
-        const Ans = {
-            userId: user?.id,
-            Answer: data.Answer,
-            questionId: id
+  return (
+    <>
+      <header className="header">
+        <h2 onClick={() => router.push("/dashboard")}>Stack Overflow</h2>
+        <input className="search-section" placeholder="Search Your Question.." />
+      </header>
 
-        }
-        console.log('onsubmit', Ans)
-        const res = await apiCreateAnswer(Ans)
-        console.log(res)
-        setanswer('')
-        loadAnswers()
+      <div className="view-container">
+        <div className="question-section">
+          <h2>{question?.title}</h2>
+          <div dangerouslySetInnerHTML={{ __html: question?.description }} />
+        </div>
 
-    }
+        <div className="breaker">
+          <h4>Your Answer</h4>
+        </div>
 
+        <form onSubmit={handleSubmit(submitAnswer)} className="form">
+          <Controller
+            name="text"
+            control={control}
+            render={({ field }) => (
+              <TextEditor value={field.value} onChange={field.onChange} />
+            )}
+          />
+          <button type="submit" className="subAnsBtn">
+            Post Answer
+          </button>
+        </form>
 
+        <div className="breaker">
+          <h4>Answers</h4>
+        </div>
 
-    return (
-        <>
-            <header className="header">
-                <h2 onClick={() => router.push('/dashboard')}>Stack OverFlow</h2>
-                <button className="dummy-btn">About</button>
-                <button className="dummy-btn">Product</button>
-                <button className="dummy-btn">For Team</button>
+        {answers.map(a => (
+          <AnswerItem key={a.id} answer={a}  />
+        ))}
 
-                <input
-                    className="search-section"
-                    placeholder="Search Your Question.."
-                />
-
-
-
-                {user ? (
-                    <button className="logout-btn">Log Out</button>
-                ) : (
-                    <div className="login-btns">
-                        <button className="signin-btn">Sign Up</button>
-                        <button className="login-btn">Log In</button>
-                    </div>
-                )}
-            </header>
-
-            <div className="view-container">
-                <div className="image-section">
-
-                </div>
-
-                <div className="question-section">
-                    <h2>{question?.title}</h2>
-                    <div dangerouslySetInnerHTML={{ __html: question?.description }} />
-
-                </div>
-
-                <div className="reply-answer">
-                    <form onSubmit={handleSubmit(onSubmit)} className="form">
-                        <Controller
-                            name="Answer"
-                            control={control}
-                            render={({ field }) => (
-                                <TextEditor
-                                    value={field.value}
-                                    onChange={field.onChange}
-
-                                />
-                            )}
-                        />
-                        {errors.Answer && (
-                            <p className="error">{errors.Answer.message}</p>
-                        )}
-
-
-                        <div className="subAnsBlock" >
-                            <button type="submit" className="subAnsBtn" >Post Your Answer</button>
-                        </div>
-                    </form>
-                </div>
-                <div className="breaker">
-                    <h4>Answers...</h4>
-                </div>
-                <div>
-                    {answerData?.map((ans) => {
-                        return (<div className="ansBlock">
-                            <div className="votebtn">
-                                <KeyboardArrowUpIcon/>
-                                <KeyboardArrowDownIcon/>
-
-                            </div>
-                            <div dangerouslySetInnerHTML={{ __html: ans.answer }} />
-                        </div>)
-                    })}
-                </div>
-            </div>
-        </>
-    );
+        {hasMore && (
+          <button className="load-more" onClick={() => loadAnswers()}>
+            Load more answers
+          </button>
+        )}
+      </div>
+    </>
+  )
 }

@@ -1,19 +1,17 @@
-import {  IsString, IsEmail,IsNotEmpty, IsOptional } from 'class-validator';
-
+import { IsUUID, IsString, IsNotEmpty, IsOptional } from 'class-validator'
 
 export class CreateAnswerDto {
+  @IsUUID()
+  questionId: string
 
-    @IsString({message:'enter only string'})
-    @IsOptional()
-    questionId:string
+  @IsUUID()
+  userId: string
 
-    @IsString({message:'enter only string'})
-    @IsNotEmpty({message:'this field cannot be emty'})
-    userId:string
+  @IsString()
+  @IsNotEmpty()
+  answer: string
 
-    @IsString({message:'enter only string'})
-    @IsNotEmpty({message:'this field cannot be emty'})
-    Answer:string
-
-
+  @IsUUID()
+  @IsOptional()
+  parentAnswerId?: string
 }

@@ -1,34 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AnswersService } from './answers.service';
-import { CreateAnswerDto } from './dto/create-answer.dto';
-import { UpdateAnswerDto } from './dto/update-answer.dto';
+import { Controller, Post, Body, Get, Param, Query } from '@nestjs/common'
+import { AnswersService } from './answers.service'
+import { CreateAnswerDto } from './dto/create-answer.dto'
+import type { AnswerQuery } from './interface/answer-query.interface'
 
 @Controller('answers')
 export class AnswersController {
   constructor(private readonly answersService: AnswersService) {}
 
   @Post()
-  create(@Body() createAnswerDto: CreateAnswerDto) {
-    return this.answersService.create(createAnswerDto);
+  create(@Body() dto: CreateAnswerDto) {
+    return this.answersService.create(dto)
   }
 
-  @Get()
-  findAll() {
-    return this.answersService.findAll();
+  @Get('question/:questionId')
+  findForQuestion(
+    @Param('questionId') questionId: string,
+    @Query() query: AnswerQuery,
+  ) {
+    return this.answersService.findForQuestion(questionId, query)
   }
 
-  @Get(':id')
-  findAnswerForQuestion(@Param('id') id: string) {
-    return this.answersService.findAnswerForQuestion(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnswerDto: UpdateAnswerDto) {
-    return this.answersService.update(+id, updateAnswerDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.answersService.remove(+id);
+  @Get('replies/:parentAnswerId')
+  findReplies(@Param('parentAnswerId') parentAnswerId: string) {
+    return this.answersService.findReplies(parentAnswerId)
   }
 }

@@ -6,7 +6,7 @@ import {
 
 @Entity('tags')
 export class Tag {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column({ unique: true, length: 50 })

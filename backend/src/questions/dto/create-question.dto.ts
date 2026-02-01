@@ -1,6 +1,14 @@
-import { IsString, IsNotEmpty, MinLength, IsArray, ArrayMinSize, IsEnum, IsNumber, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  IsArray,
+  ArrayMinSize,
+  IsEnum,
+  IsUUID,
+} from 'class-validator'
 
-enum QuestionStatus {
+export enum QuestionStatus {
   draft = 'draft',
   published = 'published',
 }
@@ -9,22 +17,21 @@ export class CreateQuestionDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(10)
-  title: string;
+  title: string
 
   @IsString()
   @IsNotEmpty()
   @MinLength(20)
-  description: string;
+  description: string
 
   @IsArray()
   @ArrayMinSize(1)
   @IsString({ each: true })
-  tags: string[];
+  tags: string[]
 
   @IsUUID()
-  @IsNotEmpty()
-  userId: string;
-  
+  userId: string
+
   @IsEnum(QuestionStatus)
-  status: QuestionStatus;
+  status: QuestionStatus
 }

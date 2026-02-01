@@ -1,35 +1,40 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
+// const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+const BASE_URL = "http://localhost:4000"
 
 export interface CreateQuestionPayload {
-  title: string;
-  description: string;
-  tags: string[];
-  userId: string;
-  status: 'draft' | 'published';
+  title: string
+  description: string
+  tags: string[]
+  userId: string
+  status: 'draft' | 'published'
 }
 
-export interface Tag {
-  id: number;
-  name: string;
+export interface GetQuestionsParams {
+  search?: string
+  tags?: string[]
+  limit?: number
+  offset?: number
+  sortByScore?: boolean
+  sortByNewest?: boolean
 }
-
 
 export const apiCreateQuestion = async (question: CreateQuestionPayload) => {
-  const res = await fetch(` http://localhost:4000/questions`, {
+  console.log("data when in api ",question)
+  
+  const res = await fetch(`${BASE_URL}/questions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(question),
-  });
+  })
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Failed to create question');
-  return data;
-};
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || 'Failed to create question')
+  return data
+}
 
-export const apiGetAllQuestions = async (params: any) => {
+export const apiGetAllQuestions = async (params: GetQuestionsParams) => {
   const query = new URLSearchParams()
 
   Object.entries(params).forEach(([key, value]) => {
@@ -40,12 +45,21 @@ export const apiGetAllQuestions = async (params: any) => {
     }
   })
 
-  const res = await fetch(` http://localhost:4000/questions?${query.toString()}`)
+  const res = await fetch(`${BASE_URL}/questions?${query.toString()}`)
   const data = await res.json()
 
   if (!res.ok) throw new Error(data.message || 'Failed to fetch questions')
   return data
 }
+
+export const apiGetQuestionById = async (id: string) => {
+  const res = await fetch(`${BASE_URL}/questions/${id}`)
+  const data = await res.json()
+
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch question')
+  return data
+}
+
 
 export const apiGetAllTags = async () => {
   const res = await fetch(`${BASE_URL}/tags`, {
@@ -58,14 +72,3 @@ export const apiGetAllTags = async () => {
 };
 
 
-export const apigetQuestionById = async (id:any) => {
-
-  console.log('working')
-  const res = await fetch(`${BASE_URL}/questions/${id}`, {
-    method: 'GET',
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch tags');
-  return data;
-};

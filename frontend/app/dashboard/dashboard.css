@@ -1,105 +1,154 @@
-.header{
-    display: flex;
-    justify-content:center;
-    align-items: center;
-    width: 100%;
-    height: 7vh;
-    border-bottom: 2px solid black;
-    
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 7vh;
+  width: 100%;
+  border-bottom: 2px solid black;
+  gap: 12px;
 }
 
-.dummy-btn{
-    margin: 0px 20px;
+.dummy-btn {
+  margin: 0 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.search-section{
-    width: 40%;
-    height: 4vh;
-    background-color: white;
-    border: 1px solid black;
-    border-radius: 5px;
-    padding-left: 10px;
+.search-section {
+  width: 35%;
+  height: 4vh;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding-left: 10px;
 }
 
-.logout-btn{
-    margin: 0px 30px;
-    height: 4vh;
-    width: 100px;
-    border: 2px solid rgb(231, 186, 186);
-    border-radius: 10px;
-    box-shadow: 1px 3px rgb(140, 138, 138)
-}
-.logout-btn:hover{
-    background-color:rgb(231, 186, 186) ;
-    transform: translateY(-2px);
-
+.AskQuestion-btn {
+  height: 4vh;
+  padding: 0 16px;
+  background-color: rgb(119, 115, 232);
+  border: 2px solid rgb(89, 89, 154);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-.main-section{
-    display: flex;
-    width: 100%;
-    height: 93vh;
+.AskQuestion-btn:hover {
+  background-color: rgba(68, 68, 177, 0.8);
 }
 
-.left-section{
-    width: 25%;
-    height: 100%;
-    border-right: 2px solid rgb(172, 166, 166);
+.logout-btn {
+  height: 4vh;
+  padding: 0 16px;
+  border: 2px solid rgb(231, 186, 186);
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
 }
 
-.AskQuestion-btn{
-    width: 140px;
-    height: 4vh;
-    background-color: rgb(119, 115, 232);
-    border: 2px solid rgb(89, 89, 154);
-    color: white;
-    margin: 0px 15px;
-    border-radius: 10px;
+.logout-btn:hover {
+  background-color: rgb(231, 186, 186);
 }
 
-.AskQuestion-btn:hover{
-    background-color: rgba(68, 68, 177, 0.805);
+.main-section {
+  display: flex;
+  height: 93vh;
+  width: 100%;
+}
+
+.left-section {
+  width: 25%;
+  border-right: 2px solid rgb(172, 166, 166);
 }
 
 .right-section {
   flex: 1;
-  padding: 30px 60px 30px 40px;
+  padding: 30px 40px;
   background-color: #f8f9f9;
   overflow-y: auto;
 }
 
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+  background: white;
+}
+
+.filter-panel {
+  background: white;
+  border: 1px solid #d6d9dc;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.filter-row select {
+  width: 100%;
+  min-height: 80px;
+}
+
 .question-card {
+  display: flex;
+  gap: 16px;
   background-color: #ffffff;
   border: 1px solid #d6d9dc;
   border-radius: 6px;
-  padding: 16px 18px;
-  margin-bottom: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.vote-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+}
+
+.vote-icon {
+  cursor: pointer;
+  color: #777;
+}
+
+.vote-score {
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.question-content {
+  flex: 1;
+  cursor: pointer;
 }
 
 .question-title {
   font-size: 18px;
-  font-weight: 500;
   color: #0074cc;
-  margin-bottom: 8px;
-  cursor: pointer;
+  margin-bottom: 6px;
 }
 
 .question-title:hover {
   color: #0a95ff;
 }
 
-.question-desc {
-  font-size: 14px;
-  color: #3b4045;
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
 .tag-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 10px;
 }
 
 .tag-pill {
@@ -110,21 +159,22 @@
   border-radius: 3px;
 }
 
-.question-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #6a737c;
-}
-
-.status-badge {
-  text-transform: capitalize;
-}
-
-.loading-text,
-.empty-text {
+.loading-text {
   text-align: center;
+  margin-top: 20px;
   color: #6a737c;
-  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .left-section {
+    display: none;
+  }
+
+  .search-section {
+    width: 50%;
+  }
+
+  .right-section {
+    padding: 20px;
+  }
 }

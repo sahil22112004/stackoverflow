@@ -1,45 +1,34 @@
-import { Question } from 'src/questions/entities/question.entity';
-import { User } from '../../auth/entities/auth.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne } from 'typeorm';
-import { Answer } from '../../answers/entities/answer.entity';
-
-export enum VoteStatus {
-  upvote = 'upvote',
-  downvote = 'downvote',
-}
-
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Unique,
+} from 'typeorm'
+import { VoteStatus, VoteTargetType } from '../dto/create-vote.dto'
 
 @Entity('votes')
+@Unique(['userId', 'targetId', 'targetType'])
 export class Vote {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @ManyToOne(() => Answer)
-  @JoinColumn({ name: 'answerId' })
-  answer: Answer;
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
   @Column({ type: 'uuid' })
-  answerId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  userId: string
 
   @Column({ type: 'uuid' })
-  userId: string;
+  targetId: string
 
-  @Column({
-      type: 'enum',
-      enum: VoteStatus,
-    })
-    status: VoteStatus;
+  @Column({ type: 'enum', enum: VoteTargetType })
+  targetType: VoteTargetType
+
+  @Column({ type: 'enum', enum: VoteStatus })
+  status: VoteStatus
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date
 
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @UpdateDateColumn()
-  deletedAt: Date;
+  @DeleteDateColumn()
+  deletedAt: Date | null
 }
