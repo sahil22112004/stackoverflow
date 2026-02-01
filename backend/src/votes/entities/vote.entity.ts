@@ -9,7 +9,6 @@ import {
 import { VoteStatus, VoteTargetType } from '../dto/create-vote.dto'
 
 @Entity('votes')
-@Unique(['userId', 'targetId', 'targetType'])
 export class Vote {
   @PrimaryGeneratedColumn('uuid')
   id: string
