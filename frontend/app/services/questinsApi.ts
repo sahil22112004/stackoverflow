@@ -60,6 +60,52 @@ export const apiGetQuestionById = async (id: string) => {
   return data
 }
 
+export const apiGetQuestionForUser= async (id: string) => {
+  console.log('in api',id)
+  const res = await fetch(`${BASE_URL}/questions/user/${id}`)
+  const data = await res.json()
+
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch question')
+  return data
+}
+
+export const apiGetQuestions= async () => {
+  const res = await fetch(`${BASE_URL}/questions/allQuestions`)
+  const data = await res.json()
+
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch question')
+  return data
+}
+
+export const apiQuestionStatusUpdate= async (id: string,status:any) => {
+  console.log('in api',id,"STATUS",status)
+  const res = await fetch(`${BASE_URL}/questions/udataeStatus/${id}`,{
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify(status),
+  })
+  const data = await res.json()
+
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch question')
+  return data
+}
+
+export const apiQuestionIsBlockedUpdate= async (id: string,isBlocked:any) => {
+  const res = await fetch(`${BASE_URL}/questions/updateIsBlocked/${id}`,{
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify(isBlocked),
+  })
+  const data = await res.json()
+
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch question')
+  return data
+}
+
 
 export const apiGetAllTags = async () => {
   const res = await fetch(`${BASE_URL}/tags`, {

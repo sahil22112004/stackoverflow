@@ -4,6 +4,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/auth.entity';
+import { updatebanAuthdto } from './dto/update-banAUth.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,9 @@ export class AuthService {
       await this.userRepo.save(newUser);
       return {message:'register succesfully',user:newUser} 
     }
+    if(existing.isBanned){
+      throw new HttpException('This account is banned ,Contact admin',403)
+    }
     return {message:'already existed',user:existing}
 
   }
@@ -30,23 +34,30 @@ export class AuthService {
   async login(createAuthDto: CreateAuthDto){
     const {email}= createAuthDto
     const existing = await this.userRepo.findOne({where:{email}})
+    console.log(existing)
     if (!existing){
        throw new HttpException('User Not Existed',404)
+    }
+    if(existing.isBanned){
+      console.log('this block work')
+      throw new HttpException('This account is banned ,Contact admin',403)
     }
     return existing
 
   }
 
   findAll() {
-    return `This action returns all auth`;
+    return this.userRepo.find();
   }
 
   findOne(id: number) {
     return `This action returns a #${id} auth`;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  async update(id: string, updateAuthDto: updatebanAuthdto) {
+    const {isBanned} = updateAuthDto
+    const res = await this.userRepo.update(id,{isBanned})
+    return {message:'succesfully update the ban'};
   }
 
   remove(id: number) {

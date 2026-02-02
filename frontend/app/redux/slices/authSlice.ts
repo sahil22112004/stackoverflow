@@ -30,6 +30,7 @@ export const loginUser = createAsyncThunk(
     try {
       return await apiLogin(user);
     } catch (err: any) {
+      console.log("this block work in slice")
       return rejectWithValue(err.message);
     }
   }
@@ -107,17 +108,19 @@ const authSlice = createSlice({
       })
 
       .addCase(googleLogin.pending, (state) => {
+        console.log("data is in google pending")
         state.loading = true;
         state.error = null;
       })
       .addCase(googleLogin.fulfilled, (state, action) => {
-        console.log(action.payload)
+        console.log("data is in google payload",action.payload)
         state.loading = false;
         state.isLoggedIn = true;
-        state.currentUser = action.payload;
+        state.currentUser = action.payload.user;
         state.error = null;
       })
       .addCase(googleLogin.rejected, (state, action: any) => {
+        console.log("data is in google rejected",action.payload)
         state.loading = false;
         state.error = action.payload;
       });

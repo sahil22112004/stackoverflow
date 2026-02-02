@@ -165,6 +165,49 @@
   color: #6a737c;
 }
 
+.signin-btn{
+  width: 70px;
+  height: 4vh;
+  border-radius: 10px;
+  background-color: rgb(127, 127, 223);
+  margin: 0px 10px;
+  border: 1px solid blue;
+}
+.login-btn{
+    width: 70px;
+  height: 4vh;
+  border-radius: 10px;
+  background-color: rgb(127, 127, 223);
+  margin: 0px 10px;
+  border: 1px solid blue;
+
+}
+
+.left-section{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: end;
+
+}
+.left-section button{
+  width: 100px;
+  height: 5vh;
+  background-color: rgb(137, 140, 142);
+  margin: 30px 0px;
+  border: 1px solid black;
+}
+
+.updatestatusbtn{
+  width: auto;
+  height: auto;
+  padding: 5px;
+  background-color: rgb(128, 195, 204);
+  border: 2px solid gray;
+  margin-top: 30px;
+  border-radius: 10px;
+}
+
 @media (max-width: 768px) {
   .left-section {
     display: none;

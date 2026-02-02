@@ -13,9 +13,12 @@ import {
   resetQuestions,
 } from "../redux/slices/questionSlice"
 import { voteTarget } from "../redux/slices/voteSlice"
-import { apiGetAllTags } from "../services/questinsApi"
+import { apiGetAllTags, apiGetQuestionForUser, apiQuestionStatusUpdate } from "../services/questinsApi"
 
 import "./dashboard.css"
+import { logout } from "../redux/slices/authSlice"
+import { signOut } from "firebase/auth"
+import { auth } from "../firebase/firrebase"
 
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>()
@@ -35,6 +38,33 @@ export default function Dashboard() {
   const [sortByScore, setSortByScore] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
+  const [ pages,setpages] = useState<any>('questions')
+  const [myquestions,setMyQuestion] = useState<any[]>([])
+  
+  const loadmyQuestion = async(id:any)=>{
+    console.log("in load function")
+    const data = await apiGetQuestionForUser(id)
+    setMyQuestion(data)
+
+  }
+
+  useEffect(()=>{
+    console.log('working',pages)
+    if(pages=='myquestions'){
+      loadmyQuestion(user?.id)
+    }
+  },[pages])
+
+  const handleQuestionStatus = async(id:any)=>{
+    const status={
+      status:'published'
+    }
+
+    const res = await apiQuestionStatusUpdate(id,status)
+    loadmyQuestion(user?.id)
+
+  }
+
 
   const LIMIT = 10
 
@@ -100,9 +130,16 @@ export default function Dashboard() {
     })
   }
 
+  const handleLogout = async()=>{
+    dispatch(logout())
+    await signOut(auth);
+    router.push('/auth/login')
+    console.log('user is',user)
+  }
+  console.log('user is vf',user)
+
   return (
     <>
-      {/* HEADER */}
       <header className="header">
         <button className="dummy-btn">About</button>
         <button className="dummy-btn">Product</button>
@@ -122,27 +159,32 @@ export default function Dashboard() {
           Ask a Question
         </button>
 
-        {user ? (
-          <button className="logout-btn">Log Out</button>
+
+        {(user!==null) ? (
+          <button className="logout-btn" onClick={handleLogout}>Log Out</button>
         ) : (
           <div className="login-btns">
-            <button className="signin-btn">Sign Up</button>
-            <button className="login-btn">Log In</button>
+            <button className="signin-btn" onClick={()=>router.push('/auth/register')}>Sign Up</button>
+            <button className="login-btn" onClick={()=>router.push('/auth/login')} >Log In</button>
           </div>
         )}
       </header>
 
-      {/* MAIN */}
       <div className="main-section">
-        <div className="left-section"></div>
+        <div className="left-section">
+          <button onClick={()=>setpages('questions')}> questions</button>
+          <button onClick={()=>setpages('myquestions')} >My Question</button>
+        </div>
 
         <div className="right-section">
-          <div className="dashboard-header">
+          {(pages=='questions') &&
+            <>
+            <div className="dashboard-header">
             <h2>All Questions</h2>
             <button
               className="filter-btn"
               onClick={() => setShowFilter(prev => !prev)}
-            >
+              >
               Filter
             </button>
           </div>
@@ -158,7 +200,7 @@ export default function Dashboard() {
                       setSortByNewest(true)
                       setSortByScore(false)
                     }}
-                  />
+                    />
                   Newest
                 </label>
 
@@ -170,7 +212,7 @@ export default function Dashboard() {
                       setSortByScore(true)
                       setSortByNewest(false)
                     }}
-                  />
+                    />
                   Score
                 </label>
               </div>
@@ -185,7 +227,7 @@ export default function Dashboard() {
                       Array.from(e.target.selectedOptions).map(o => o.value)
                     )
                   }
-                >
+                  >
                   {allTags.map(tag => (
                     <option key={tag} value={tag}>
                       {tag}
@@ -202,12 +244,12 @@ export default function Dashboard() {
                 <KeyboardArrowUpIcon
                   className="vote-icon"
                   onClick={() => voteQuestion(String(q.id), "upvote")}
-                />
+                  />
                 <div className="vote-score">{q.score}</div>
                 <KeyboardArrowDownIcon
                   className="vote-icon"
                   onClick={() => voteQuestion(String(q.id), "downvote")}
-                />
+                  />
               </div>
 
               <div
@@ -215,22 +257,46 @@ export default function Dashboard() {
                 onClick={() =>
                   router.push(`/dashboard/questions/${q.id}`)
                 }
-              >
+                >
                 <h3 className="question-title">{q.title}</h3>
 
                 {/* <div className="tag-row">
                   {q?.tags?.map(tag => (
                     <span key={tag} className="tag-pill">S
-                      {tag}
+                    {tag}
                     </span>
-                  ))}
-                </div> */}
+                    ))}
+                    </div> */}
               </div>
             </div>
           ))}
 
-          {loading && <p className="loading-text">Loading...</p>}
+          {loading && <p className="loading-text">Loading...</p>
+            
+          }
           <div ref={observerRef}></div>
+          </>
+          
+          }
+          {(pages=='myquestions') &&
+          <>
+          {myquestions.map(q => (
+            <div key={q.id} className="question-card">
+              <div
+                className="question-content"
+                >
+                <h3 className="question-title">{q.title}</h3>
+
+                {(q.status=='draft') &&
+                <button className="updatestatusbtn" onClick={()=>(handleQuestionStatus(q.id))}>Make it Public</button>
+
+                }
+
+              </div>
+              <h4>{q.status}</h4>
+            </div>
+          ))}
+          </>}
         </div>
       </div>
     </>

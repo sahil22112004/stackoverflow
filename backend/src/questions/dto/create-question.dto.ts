@@ -6,6 +6,7 @@ import {
   ArrayMinSize,
   IsEnum,
   IsUUID,
+  IsBoolean,
 } from 'class-validator'
 
 export enum QuestionStatus {
@@ -34,4 +35,7 @@ export class CreateQuestionDto {
 
   @IsEnum(QuestionStatus)
   status: QuestionStatus
+
+  // @IsBoolean()
+  // isBlocked: boolean
 }

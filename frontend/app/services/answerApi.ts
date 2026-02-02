@@ -54,3 +54,17 @@ export const apiGetRepliesForAnswer = async (parentAnswerId: string) => {
   if (!res.ok) throw new Error(data.message || 'Failed to fetch replies')
   return data
 }
+
+export const apiMarkValid = async(validData:any) =>{
+  console.log('wrk vlid',JSON.stringify(validData))
+  const res = await fetch(`${BASE_URL}/answers/markValid`,{
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify(validData),
+  })
+  const data = res;
+  if (!res.ok) throw new Error('Failed to mark valid')
+  return data
+}

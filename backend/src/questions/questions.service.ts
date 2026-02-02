@@ -6,6 +6,8 @@ import { Tag } from '../tags/entities/tag.entity'
 import { CreateQuestionDto } from './dto/create-question.dto'
 import { UpdateQuestionDto } from './dto/update-question.dto'
 import { QuestionQuery } from './interfaces/question-query.interface'
+import { UpdateQuestionStatusDto } from './dto/update-QuestionStatus.dto'
+import { UpdateQuestionBlockDto } from './dto/update-questionblock.dto'
 
 @Injectable()
 export class QuestionsService {
@@ -51,6 +53,8 @@ export class QuestionsService {
     const offset = Number(query.offset) || 0
 
     const qb = this.questionRepository.createQueryBuilder('q')
+     qb.andWhere('q.status = :status', { status: 'published' }) 
+    
 
     if (query.search) {
       qb.andWhere(
@@ -86,6 +90,7 @@ export class QuestionsService {
       qb.orderBy('q.createdAt', 'DESC')
     }
 
+
     qb.skip(offset).take(limit)
 
     const [questions, total] = await qb.getManyAndCount()
@@ -94,6 +99,7 @@ export class QuestionsService {
   }
 
   async findAllByUser(userId: string) {
+    console.log(userId)
     return this.questionRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
@@ -122,5 +128,21 @@ export class QuestionsService {
     const question = await this.findOne(id)
     await this.questionRepository.remove(question)
     return { deleted: true }
+  }
+
+  async updatestatus(id: string, dto: UpdateQuestionStatusDto) {
+    const {status} =dto
+    const data = await this.questionRepository.update(id,{status})
+    return {message:'update status to publishes'}
+  }
+
+  async findAll(){
+    return this.questionRepository.find()
+  }
+  
+  async updateIsBlocked(id:string,dto:UpdateQuestionBlockDto){
+    const {isBlocked} = dto
+    const res = await this.questionRepository.update(id,{isBlocked})
+    return {meassage:'succesfully change isBlocked'}
   }
 }

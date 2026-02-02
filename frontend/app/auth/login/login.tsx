@@ -17,20 +17,20 @@ import { useSelector, useDispatch } from 'react-redux'
 import type { AppDispatch, RootState } from '../../redux/store'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, githubprovider, googleProvider } from '../../firebase/firrebase';
 import Link from 'next/link'
 // import { googleLogin, loginUser } from '../../redux/slices/authSlice';
 import './login.css';
 import GoogleIcon from "@mui/icons-material/Google";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { loginUser, registerUser } from '../../redux/slices/authSlice';
+import { googleLogin, loginUser, registerUser } from '../../redux/slices/authSlice';
 
 function Login() {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar()
   const [showPassword, setShowPassword] = useState(false);
-//   const { isLoggedIn, currentUser } = useSelector((state: RootState) => state.auth)
+  const { isLoggedIn, currentUser,error } = useSelector((state: RootState) => state.auth)
   const dispatch = useDispatch<AppDispatch>()
 
   const singupschema = z.object({
@@ -51,6 +51,20 @@ function Login() {
 //     }
 //   }, [isLoggedIn, currentUser, router]);
 
+useEffect(()=>{
+  const redirect = async () =>{
+    if(currentUser && !error){
+    router.push('/dashboard')
+    enqueueSnackbar("Login Success!", { variant: "success" });}
+    if (error){
+    await signOut(auth);
+    enqueueSnackbar(error, { variant: "error" });
+  }
+
+  }
+  redirect()
+},[currentUser,error])
+
  const onSubmit = (user: loginInterface) => {
 
     signInWithEmailAndPassword(auth, user.email, user.password)
@@ -60,12 +74,12 @@ function Login() {
             email:userCredential.user.email
         }
         try{
-            dispatch(loginUser(user))
-            router.push('/dashboard')
-            enqueueSnackbar("Login Success!", { variant: "error" });
+          await dispatch(loginUser(user))
+            
         }catch(error:any){
             console.log(error)
-             enqueueSnackbar(error, { variant: "error" });
+            await signOut(auth);
+            enqueueSnackbar(error, { variant: "error" });
         }
 
 
@@ -88,9 +102,9 @@ function Login() {
                 email: firebaseUser.email
             }
             try {
-                await dispatch(registerUser(User))
-                router.push('/dashboard')
-                enqueueSnackbar("Google Login Success!", { variant: "success" });
+                await dispatch(googleLogin(User))
+                // router.push('/dashboard')
+                // enqueueSnackbar("Google Login Success!", { variant: "success" });
 
             } catch (error: any) {
                 console.log(error)
@@ -114,9 +128,9 @@ function Login() {
             }
 
             try {
-                await dispatch(registerUser(User))
-                router.push('/dashboard')
-                enqueueSnackbar("Github Login Success!", { variant: "error" });
+                await dispatch(googleLogin(User))
+                // router.push('/dashboard')
+                // enqueueSnackbar("Github Login Success!", { variant: "error" });
 
             } catch (error: any) {
                 console.log(error)

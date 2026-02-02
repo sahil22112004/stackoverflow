@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param, Query } from '@nestjs/common'
+import { Controller, Post, Body, Get, Param, Query, Patch } from '@nestjs/common'
 import { AnswersService } from './answers.service'
 import { CreateAnswerDto } from './dto/create-answer.dto'
 import type { AnswerQuery } from './interface/answer-query.interface'
+import { updateanswervalidDto } from './dto/update-validanswer.dto'
 
 @Controller('answers')
 export class AnswersController {
@@ -23,5 +24,11 @@ export class AnswersController {
   @Get('replies/:parentAnswerId')
   findReplies(@Param('parentAnswerId') parentAnswerId: string) {
     return this.answersService.findReplies(parentAnswerId)
+  }
+
+  @Patch('/markValid')
+  markValid(@Body() dto: updateanswervalidDto) {
+    console.log('working',dto)
+    return this.answersService.markValid(dto)
   }
 }
