@@ -15,7 +15,7 @@ const datasource :DataSourceOptions & SeederOptions={
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'admin',
+  password: '1104',
   database: 'stackoverflow',
   entities: [User,Question,Tag,Answer,Vote],
   migrations: ['src/migrations/*.ts'],

@@ -22,9 +22,17 @@ export class AnswersController {
   }
 
   @Get('replies/:parentAnswerId')
-  findReplies(@Param('parentAnswerId') parentAnswerId: string) {
-    return this.answersService.findReplies(parentAnswerId)
-  }
+findReplies(
+  @Param('parentAnswerId') parentAnswerId: string,
+  @Query('limit') limit?: number,
+  @Query('offset') offset?: number,
+) {
+  return this.answersService.findReplies(parentAnswerId, {
+    limit,
+    offset,
+  })
+}
+
 
   @Patch('/markValid')
   markValid(@Body() dto: updateanswervalidDto) {

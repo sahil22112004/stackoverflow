@@ -65,17 +65,31 @@ export class AnswersService {
     }
   }
 
-  async findReplies(parentAnswerId: string) {
-    return this.answerRepo.find({
-      where: {
-        parentAnswerId,
-      },
-      order: {
-        score: 'DESC',
-        createdAt: 'ASC',
-      },
-    })
+  async findReplies(
+  parentAnswerId: string,
+  query: { limit?: number; offset?: number },
+) {
+  const limit = Number(query.limit) || 3
+  const offset = Number(query.offset) || 0
+
+  const [replies, total] = await this.answerRepo.findAndCount({
+    where: { parentAnswerId },
+    order: {
+      score: 'DESC',
+      createdAt: 'ASC',
+    },
+    take: limit,
+    skip: offset,
+  })
+
+  return {
+    replies,
+    total,
+    limit,
+    offset,
   }
+}
+
 
   async markValid(validDto:updateanswervalidDto){
 

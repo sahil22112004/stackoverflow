@@ -9,6 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import ExpandLessIcon from "@mui/icons-material/ExpandLess"
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 
 import { RootState, AppDispatch } from "../../../redux/store"
 import { apiGetQuestionById } from "../../../services/questinsApi"
@@ -19,8 +22,6 @@ import {
   apiMarkValid,
 } from "@/app/services/answerApi"
 import { voteTarget } from "../../../redux/slices/voteSlice"
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-
 
 import TextEditor from "@/app/components/muitiptap"
 import "./view.css"
@@ -32,31 +33,61 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 const LIMIT = 5
+const REPLY_LIMIT = 3
 
-function AnswerItem({ answer ,question}: { answer: any ,question:any}) {
-
+function AnswerItem({
+  answer,
+  question,
+  depth = 0,
+}: {
+  answer: any
+  question: any
+  depth?: number
+}) {
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((s: RootState) => s.auth.currentUser)
   const voteLoading = useSelector((s: RootState) => s.votes.loading)
 
   const [replies, setReplies] = useState<any[]>([])
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [showReply, setShowReply] = useState(false)
-  
+
   const { handleSubmit, control, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { text: "" },
   })
 
-  const loadReplies = async () => {
-    console.log('THIS IS ALSO WORK')
-    const data = await apiGetRepliesForAnswer(answer.id)
-    console.log('DATA IS',data)
-    setReplies(data)
+  const loadReplies = async (reset = false) => {
+    const res = await apiGetRepliesForAnswer(answer.id, {
+      limit: REPLY_LIMIT,
+      offset: reset ? 0 : offset,
+    })
+
+    if (reset) {
+      setReplies(res.replies)
+      setOffset(res.replies.length)
+    } else {
+      setReplies(prev => [...prev, ...res.replies])
+      setOffset(o => o + res.replies.length)
+    }
+
+    setHasMore(res.replies.length === REPLY_LIMIT)
   }
 
-  useEffect(() => {
-    loadReplies()
-  }, [answer.id])
+  const toggleReplies = async () => {
+    if (expanded) {
+      setExpanded(false)
+      setReplies([])
+      setOffset(0)
+      setHasMore(false)
+      return
+    }
+
+    await loadReplies(true)
+    setExpanded(true)
+  }
 
   const submitReply = async (data: FormData) => {
     if (!user) return
@@ -70,11 +101,11 @@ function AnswerItem({ answer ,question}: { answer: any ,question:any}) {
 
     reset()
     setShowReply(false)
-    loadReplies()
+    await loadReplies(true)
+    setExpanded(true)
   }
 
   const vote = (status: "upvote" | "downvote") => {
-    console.log('this block work ')
     if (!user || voteLoading) return
 
     dispatch(
@@ -85,43 +116,56 @@ function AnswerItem({ answer ,question}: { answer: any ,question:any}) {
         status,
       })
     )
-    loadReplies()
   }
 
-  const handleMarkValid = async(id:any)=>{
-    console.log(id,"ui")
-    const validData ={
-      id:id,
-      isValid:true
-    }
-    const res = await apiMarkValid(validData)
+  const markValid = async () => {
+    await apiMarkValid({ id: answer.id, isValid: true })
   }
+
+  const showArrow =
+    typeof answer.replyCount === "number"
+      ? answer.replyCount > 0
+      : true
 
   return (
-    <div className="ansBlock" >
+    <div className="ansBlock" style={{ marginLeft: depth * 24 }}>
       <div className="voteandcomment">
-
-      <div className="votebtn">
-        <KeyboardArrowUpIcon onClick={() => vote("upvote")} />
-        <div className="voteScore">{answer.score}</div>
-        <KeyboardArrowDownIcon onClick={() => vote("downvote")} />
-      </div>
-
-      <div
-        className="answerText"
-        dangerouslySetInnerHTML={{ __html: answer.answer }}
-        />
-      {answer.isValid && <h4><CheckCircleIcon/> valid</h4>}
-      {(answer.parentAnswerId==null && answer.isValid==false && question.userId == user?.id ) &&
-      <button onClick={()=>handleMarkValid(answer.id)}>Mark valid</button>
-
-      }
+        <div className="votebtn">
+          <KeyboardArrowUpIcon onClick={() => vote("upvote")} />
+          <div className="voteScore">{answer.score}</div>
+          <KeyboardArrowDownIcon onClick={() => vote("downvote")} />
         </div>
 
-      <button className="replyBtn" onClick={() => setShowReply(v => !v)}>
-        Reply this answer
-      </button>
-      
+        <div
+          className="answerText"
+          dangerouslySetInnerHTML={{ __html: answer.answer }}
+        />
+
+        {answer.isValid && (
+          <h4>
+            <CheckCircleIcon /> valid
+          </h4>
+        )}
+
+        {answer.parentAnswerId === null &&
+          !answer.isValid &&
+          question?.userId === user?.id && (
+            <button onClick={markValid}>Mark valid</button>
+          )}
+      </div>
+
+      <div className="replyActions">
+        <button className="replyBtn" onClick={() => setShowReply(v => !v)}>
+          Reply this answer
+        </button>
+
+        {showArrow && (
+          <button className="replyBtn" onClick={toggleReplies}>
+            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {expanded ? "Hide replies" : "View replies"}
+          </button>
+        )}
+      </div>
 
       {showReply && (
         <form onSubmit={handleSubmit(submitReply)} className="replyForm">
@@ -132,18 +176,30 @@ function AnswerItem({ answer ,question}: { answer: any ,question:any}) {
               <TextEditor value={field.value} onChange={field.onChange} />
             )}
           />
-          {/* {errors.description && (
-          <p className="error">{errors.description.message}</p>
-        )} */}
           <button type="submit" className="subAnsBtn">
             Post Reply
           </button>
         </form>
       )}
 
-      {replies.map(r => (
-        <AnswerItem key={r.id} answer={r}  question={question}/>
-      ))}
+      {expanded && (
+        <div className="nestedReplies">
+          {replies.map(r => (
+            <AnswerItem
+              key={r.id}
+              answer={r}
+              question={question}
+              depth={depth + 1}
+            />
+          ))}
+
+          {hasMore && (
+            <button className="replyBtn" onClick={() => loadReplies()}>
+              See more replies
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -203,17 +259,17 @@ export default function ViewQuestion({ id }: { id: string }) {
     reset()
     loadAnswers(true)
   }
-  if(question?.isBlocked){
+
+  if (question?.isBlocked) {
     return (
-      <div>
+      <>
         <header className="header">
-        <h2 onClick={() => router.push("/dashboard")}>Stack Overflow</h2>
-        <input className="search-section" placeholder="Search Your Question.." />
-      </header>
-      <div className="deltedBlock">
-        <h2>This Question is Deleted. No longer can be Seen</h2>
-      </div>
-      </div>
+          <h2 onClick={() => router.push("/dashboard")}>Stack Overflow</h2>
+        </header>
+        <div className="deltedBlock">
+          <h2>This Question is Deleted. No longer can be Seen</h2>
+        </div>
+      </>
     )
   }
 

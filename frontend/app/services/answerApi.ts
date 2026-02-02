@@ -1,5 +1,9 @@
 const BASE_URL = 'http://localhost:4000'
 
+export interface GetRepliesParams {
+  limit?: number
+  offset?: number
+}
 export interface CreateAnswerPayload {
   questionId: string
   userId: string
@@ -45,15 +49,32 @@ export const apiGetAnswersForQuestion = async (
   return data
 }
 
-export const apiGetRepliesForAnswer = async (parentAnswerId: string) => {
+
+export const apiGetRepliesForAnswer = async (
+  parentAnswerId: string,
+  params: GetRepliesParams = {}
+) => {
+  const query = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      query.append(key, String(value))
+    }
+  })
+
   const res = await fetch(
-    `${BASE_URL}/answers/replies/${parentAnswerId}`
+    `${BASE_URL}/answers/replies/${parentAnswerId}?${query.toString()}`
   )
 
   const data = await res.json()
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch replies')
+
+  if (!res.ok) {
+    throw new Error(data.message || 'Failed to fetch replies')
+  }
+
   return data
 }
+
 
 export const apiMarkValid = async(validData:any) =>{
   console.log('wrk vlid',JSON.stringify(validData))
