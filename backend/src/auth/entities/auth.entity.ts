@@ -12,6 +12,9 @@ export class User{
   @Column({ unique: true })
   email: string;
 
+  @Column({default:false})
+  isBanned:boolean
+
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',

@@ -5,11 +5,11 @@ import { TextField, Button, Typography, InputAdornment, IconButton, MenuItem } f
 import * as z from "zod";
 import { useSnackbar } from "notistack";
 import { useDispatch, useSelector } from "react-redux";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { auth, githubprovider, googleProvider } from "../../firebase/firrebase";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 // import { googleLogin, registerUser } from "@/app/redux/slices/authSlice";
@@ -24,7 +24,7 @@ function Register() {
     const { enqueueSnackbar } = useSnackbar();
     const dispatch = useDispatch<AppDispatch>();
     const [showPassword, setShowPassword] = useState(false);
-    const { isLoggedIn, currentUser, loading } = useSelector((state: RootState) => state.auth);
+  const { isLoggedIn, currentUser,error } = useSelector((state: RootState) => state.auth)
 
     const signupSchema = z.object({
         username: z.string().min(1, "User Name is required"),
@@ -38,6 +38,21 @@ function Register() {
         resolver: zodResolver(signupSchema),
         defaultValues: { username: "", email: "", password: "" },
     });
+
+    useEffect(()=>{
+      const redirect = async () =>{
+        if(currentUser && !error){
+                router.push('/dashboard')
+                enqueueSnackbar("Register Successfully ", { variant: "success" });}
+                if (error){
+                  await signOut(auth);
+                  enqueueSnackbar(error, { variant: "error" });
+    
+                }
+    
+      }
+      redirect()
+    },[currentUser,error])
 
 
     const onSubmit = async (user: SignupForm) => {
@@ -81,8 +96,8 @@ function Register() {
             }
             try {
                 await dispatch(googleLogin(User))
-                router.push('/dashboard')
-                enqueueSnackbar("Google Login Success!", { variant: "success" });
+                // router.push('/dashboard')
+                // enqueueSnackbar("Google Login Success!", { variant: "success" });
 
             } catch (error: any) {
                 console.log(error)
@@ -107,8 +122,8 @@ function Register() {
 
             try {
                 await dispatch(googleLogin(User))
-                router.push('/dashboard')
-                enqueueSnackbar("Github Login Success!", { variant: "error" });
+                // router.push('/dashboard')
+                // enqueueSnackbar("Github Login Success!", { variant: "error" });
 
             } catch (error: any) {
                 console.log(error)

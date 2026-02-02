@@ -4,6 +4,7 @@ import { Repository, IsNull } from 'typeorm'
 import { Answer } from './entities/answer.entity'
 import { CreateAnswerDto } from './dto/create-answer.dto'
 import { AnswerQuery } from './interface/answer-query.interface'
+import { updateanswervalidDto } from './dto/update-validanswer.dto'
 
 @Injectable()
 export class AnswersService {
@@ -12,17 +13,17 @@ export class AnswersService {
     private readonly answerRepo: Repository<Answer>,
   ) {}
 
-  async create(dto: CreateAnswerDto) {
-    if (dto.parentAnswerId) {
+  async create(createAnswerDto: CreateAnswerDto) {
+    if (createAnswerDto.parentAnswerId) {
       const parent = await this.answerRepo.findOne({
-        where: { id: dto.parentAnswerId },
+        where: { id: createAnswerDto.parentAnswerId },
       })
 
       if (!parent) {
         throw new BadRequestException('Parent answer not found')
       }
 
-      if (parent.questionId !== dto.questionId) {
+      if (parent.questionId !== createAnswerDto.questionId) {
         throw new BadRequestException(
           'Reply must belong to the same question',
         )
@@ -30,10 +31,10 @@ export class AnswersService {
     }
 
     const answer = this.answerRepo.create({
-      questionId: dto.questionId,
-      userId: dto.userId,
-      answer: dto.answer,
-      parentAnswerId: dto.parentAnswerId ?? null,
+      questionId: createAnswerDto.questionId,
+      userId: createAnswerDto.userId,
+      answer: createAnswerDto.answer,
+      parentAnswerId: createAnswerDto.parentAnswerId ?? null,
     })
 
     return this.answerRepo.save(answer)
@@ -74,5 +75,15 @@ export class AnswersService {
         createdAt: 'ASC',
       },
     })
+  }
+
+  async markValid(validDto:updateanswervalidDto){
+
+    console.log('service dto',validDto)
+    const {isValid,id} = validDto
+    const data = await this.answerRepo.update(id,{isValid})
+    console.log("data is ",data)
+
+    return {message:'maked valid'}
   }
 }

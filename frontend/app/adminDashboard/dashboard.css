@@ -1,0 +1,135 @@
+.admin-container {
+  width: 100%;
+  padding: 20px;
+  font-family: system-ui, sans-serif;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  padding: 8px 14px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: #d32f2f;
+}
+
+/* TABS */
+.admin-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.admin-tabs button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: #e0e0e0;
+  cursor: pointer;
+  border-radius: 0;
+  font-weight: 600;
+  font-size: 15px;
+  transition: 0.3s;
+  border-right: 1px solid #d0d0d0;
+  border-radius: 10px;
+  margin: 0px 10px
+}
+
+.admin-tabs button:last-child {
+  border-right: none;
+}
+
+.admin-tabs button.active {
+  background: #007bff;
+  color: white;
+}
+
+.admin-table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  text-align: left;
+}
+
+th {
+  background: #f7f7f7;
+  font-weight: 600;
+}
+
+.block-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.unblock-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .admin-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .admin-tabs {
+    flex-direction: column;
+  }
+
+  .admin-tabs button {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #d0d0d0;
+  }
+
+  .admin-tabs button:last-child {
+    border-bottom: none;
+  }
+}

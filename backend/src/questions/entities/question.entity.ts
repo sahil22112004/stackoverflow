@@ -45,6 +45,9 @@ export class Question {
   @Column({ default: 0 })
   score: number
 
+  @Column({default:false})
+  isBlocked:boolean
+
   @CreateDateColumn()
   createdAt: Date
 

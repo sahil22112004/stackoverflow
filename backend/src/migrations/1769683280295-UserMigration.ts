@@ -12,19 +12,24 @@ export class UserMigration1769143681417 implements MigrationInterface {
                         type: "uuid",
                         isPrimary: true,
                         generationStrategy: "uuid",
-                        default: "uuid_generate_v4()"
+                        default: "uuid_generate_v4()",
                     },
                     {
                         name: "email",
                         type: "varchar",
                         isNullable: false,
-                        isUnique: true
+                        isUnique: true,
                     },
                     {
                         name: "username",
                         type: "varchar",
                         isNullable: true,
 
+                    },
+                    {
+                        name:'isBanned',
+                        type:'boolean',
+                        default:false,
                     },
                     {
                         name: "createdAt",

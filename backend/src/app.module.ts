@@ -22,7 +22,7 @@ import { Vote } from './votes/entities/vote.entity';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1104',
+      password: 'admin',
       database: 'stackoverflow',
       entities: [User,Question,Tag,Answer,Vote],
       synchronize: false,

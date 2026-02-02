@@ -52,6 +52,11 @@ export class QuestionsMigration1769711718507 implements MigrationInterface {
             default: 0,
           },
           {
+            name: 'isBlocked',
+            type: 'boolean',
+            default:false
+          },
+          {
             name: 'createdAt',
             type: 'timestamp',
             default: 'NOW()',

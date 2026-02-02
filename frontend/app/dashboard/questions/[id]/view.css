@@ -152,6 +152,17 @@
   background-color: #f0f0f0;
 }
 
+.voteandcomment{
+  display: flex;
+}
+.deltedBlock{
+  display: flex;
+  width: 100%;
+  height: 90vh;
+  justify-content: center;
+  align-items: center;
+}
+
 @media (max-width: 900px) {
   .question-section,
   .form,

@@ -16,35 +16,41 @@ import {
   apiCreateAnswer,
   apiGetAnswersForQuestion,
   apiGetRepliesForAnswer,
+  apiMarkValid,
 } from "@/app/services/answerApi"
 import { voteTarget } from "../../../redux/slices/voteSlice"
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
 
 import TextEditor from "@/app/components/muitiptap"
 import "./view.css"
 
 const schema = z.object({
-  text: z.string().min(20).max(2000),
+  text: z.string().min(20).max(2000).trim(),
 })
 
 type FormData = z.infer<typeof schema>
 
 const LIMIT = 5
 
-function AnswerItem({ answer }: { answer: any }) {
+function AnswerItem({ answer ,question}: { answer: any ,question:any}) {
+
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((s: RootState) => s.auth.currentUser)
   const voteLoading = useSelector((s: RootState) => s.votes.loading)
 
   const [replies, setReplies] = useState<any[]>([])
   const [showReply, setShowReply] = useState(false)
-
+  
   const { handleSubmit, control, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { text: "" },
   })
 
   const loadReplies = async () => {
+    console.log('THIS IS ALSO WORK')
     const data = await apiGetRepliesForAnswer(answer.id)
+    console.log('DATA IS',data)
     setReplies(data)
   }
 
@@ -68,6 +74,7 @@ function AnswerItem({ answer }: { answer: any }) {
   }
 
   const vote = (status: "upvote" | "downvote") => {
+    console.log('this block work ')
     if (!user || voteLoading) return
 
     dispatch(
@@ -77,11 +84,23 @@ function AnswerItem({ answer }: { answer: any }) {
         userId: String(user.id),
         status,
       })
-    ).then(loadReplies)
+    )
+    loadReplies()
+  }
+
+  const handleMarkValid = async(id:any)=>{
+    console.log(id,"ui")
+    const validData ={
+      id:id,
+      isValid:true
+    }
+    const res = await apiMarkValid(validData)
   }
 
   return (
     <div className="ansBlock" >
+      <div className="voteandcomment">
+
       <div className="votebtn">
         <KeyboardArrowUpIcon onClick={() => vote("upvote")} />
         <div className="voteScore">{answer.score}</div>
@@ -91,11 +110,18 @@ function AnswerItem({ answer }: { answer: any }) {
       <div
         className="answerText"
         dangerouslySetInnerHTML={{ __html: answer.answer }}
-      />
+        />
+      {answer.isValid && <h4><CheckCircleIcon/> valid</h4>}
+      {(answer.parentAnswerId==null && answer.isValid==false && question.userId == user?.id ) &&
+      <button onClick={()=>handleMarkValid(answer.id)}>Mark valid</button>
+
+      }
+        </div>
 
       <button className="replyBtn" onClick={() => setShowReply(v => !v)}>
         Reply this answer
       </button>
+      
 
       {showReply && (
         <form onSubmit={handleSubmit(submitReply)} className="replyForm">
@@ -106,6 +132,9 @@ function AnswerItem({ answer }: { answer: any }) {
               <TextEditor value={field.value} onChange={field.onChange} />
             )}
           />
+          {/* {errors.description && (
+          <p className="error">{errors.description.message}</p>
+        )} */}
           <button type="submit" className="subAnsBtn">
             Post Reply
           </button>
@@ -113,7 +142,7 @@ function AnswerItem({ answer }: { answer: any }) {
       )}
 
       {replies.map(r => (
-        <AnswerItem key={r.id} answer={r}  />
+        <AnswerItem key={r.id} answer={r}  question={question}/>
       ))}
     </div>
   )
@@ -174,6 +203,19 @@ export default function ViewQuestion({ id }: { id: string }) {
     reset()
     loadAnswers(true)
   }
+  if(question?.isBlocked){
+    return (
+      <div>
+        <header className="header">
+        <h2 onClick={() => router.push("/dashboard")}>Stack Overflow</h2>
+        <input className="search-section" placeholder="Search Your Question.." />
+      </header>
+      <div className="deltedBlock">
+        <h2>This Question is Deleted. No longer can be Seen</h2>
+      </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -210,7 +252,7 @@ export default function ViewQuestion({ id }: { id: string }) {
         </div>
 
         {answers.map(a => (
-          <AnswerItem key={a.id} answer={a}  />
+          <AnswerItem key={a.id} answer={a} question={question} />
         ))}
 
         {hasMore && (

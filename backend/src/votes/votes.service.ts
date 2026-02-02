@@ -38,49 +38,49 @@ export class VotesService {
         withDeleted: true,
       })
 
-      let upDelta = 0
-      let downDelta = 0
-      let scoreDelta = 0
+      let upVote = 0
+      let downVote = 0
+      let scoreVote = 0
 
       if (!existing) {
         await voteRepo.save(voteRepo.create(dto))
         status === VoteStatus.upvote
-          ? (upDelta = 1, scoreDelta = 1)
-          : (downDelta = 1, scoreDelta = -1)
+          ? (upVote = 1, scoreVote = 1)
+          : (downVote = 1, scoreVote = -1)
       } 
       else if (existing.deletedAt) {
         existing.status = status
         existing.deletedAt = null
         await voteRepo.save(existing)
         status === VoteStatus.upvote
-          ? (upDelta = 1, scoreDelta = 1)
-          : (downDelta = 1, scoreDelta = -1)
+          ? (upVote = 1, scoreVote = 1)
+          : (downVote = 1, scoreVote = -1)
       } 
       else if (existing.status === status) {
         await voteRepo.softDelete(existing.id)
         status === VoteStatus.upvote
-          ? (upDelta = -1, scoreDelta = -1)
-          : (downDelta = -1, scoreDelta = 1)
+          ? (upVote = -1, scoreVote = -1)
+          : (downVote = -1, scoreVote = 1)
       } 
       else {
         existing.status = status
         await voteRepo.save(existing)
         status === VoteStatus.upvote
-          ? (upDelta = 1, downDelta = -1, scoreDelta = 2)
-          : (upDelta = -1, downDelta = 1, scoreDelta = -2)
+          ? (upVote = 1, downVote = -1, scoreVote = 2)
+          : (upVote = -1, downVote = 1, scoreVote = -2)
       }
 
       if (targetType === VoteTargetType.answer) {
-        await answerRepo.increment({ id: targetId }, 'upvotes', upDelta)
-        await answerRepo.increment({ id: targetId }, 'downvotes', downDelta)
-        await answerRepo.increment({ id: targetId }, 'score', scoreDelta)
+        await answerRepo.increment({ id: targetId }, 'upvotes', upVote)
+        await answerRepo.increment({ id: targetId }, 'downvotes', downVote)
+        await answerRepo.increment({ id: targetId }, 'score', scoreVote)
       } else {
-        await questionRepo.increment({ id: targetId }, 'upvotes', upDelta)
-        await questionRepo.increment({ id: targetId }, 'downvotes', downDelta)
-        await questionRepo.increment({ id: targetId }, 'score', scoreDelta)
+        await questionRepo.increment({ id: targetId }, 'upvotes', upVote)
+        await questionRepo.increment({ id: targetId }, 'downvotes', downVote)
+        await questionRepo.increment({ id: targetId }, 'score', scoreVote)
       }
 
-      return { upDelta, downDelta, scoreDelta }
+      return { upVote, downVote, scoreVote }
     })
   }
 }
