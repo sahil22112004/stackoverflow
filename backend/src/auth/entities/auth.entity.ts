@@ -1,5 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn} from 'typeorm';
 
+export enum authRole {
+  admin = 'admin',
+  user = 'user',
+}
+
 @Entity('users')
 export class User{
 
@@ -14,6 +19,13 @@ export class User{
 
   @Column({default:false})
   isBanned:boolean
+
+  @Column({
+    type:'enum',
+    enum:authRole,
+    default:authRole.user
+  })
+  role:authRole
 
   @CreateDateColumn({
     type: 'timestamp',

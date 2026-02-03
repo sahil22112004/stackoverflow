@@ -67,6 +67,7 @@ function Register() {
             const User = {
                 username: user.username,
                 email: firebaseUser.email
+                
             }
             try {
                 await dispatch(registerUser(User))

@@ -97,18 +97,21 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    if (!observerRef.current || loading || !hasMore) return
+  const handleScroll = () => {
+    if (loading || !hasMore || isFetchingRef.current) return;
 
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !isFetchingRef.current) {
-        isFetchingRef.current = true
-        loadQuestions()
-      }
-    })
+    const scrollHeight = document.documentElement.scrollHeight;
+    const currentScroll = window.innerHeight + window.scrollY;
+    
+    if (currentScroll >= scrollHeight - 200) {
+      isFetchingRef.current = true;
+      loadQuestions();
+    }
+  };
 
-    observer.observe(observerRef.current)
-    return () => observer.disconnect()
-  }, [offset, loading, hasMore])
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, [loading, hasMore, offset]);
 
   useEffect(() => {
     if (!loading) isFetchingRef.current = false

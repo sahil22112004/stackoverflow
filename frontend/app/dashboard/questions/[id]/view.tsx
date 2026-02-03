@@ -35,15 +35,7 @@ type FormData = z.infer<typeof schema>
 const LIMIT = 5
 const REPLY_LIMIT = 3
 
-function AnswerItem({
-  answer,
-  question,
-  depth = 0,
-}: {
-  answer: any
-  question: any
-  depth?: number
-}) {
+function AnswerItem({answer,question,depth = 0,}: { answer: any ,question: any ,depth?: number}) {
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((s: RootState) => s.auth.currentUser)
   const voteLoading = useSelector((s: RootState) => s.votes.loading)
